@@ -1,0 +1,28 @@
+app.post('/f/:forumId([0-9]+)/t/:topicId([0-9]+)', function(req, res) {
+  if(req.isAuthenticated()) {
+
+    let currentIndex = forum[req.params.forumId].topics.findIndex(topic=>topic.id==req.params.topicId)
+    let currentTopic = forum[req.params.forumId].topics[currentIndex]
+
+    currentTopic.posts.push({post: req.body.post, author: req.user.username, timestamp: new Date(), id: currentTopic.posts.length})
+    forum[req.params.forumId].topics = forum[req.params.forumId].topics.concat(forum[req.params.forumId].topics.splice(currentIndex, 1));
+    res.sendStatus(200)
+  } else {
+    res.sendStatus(401)
+  }
+})
+
+app.post('/f/:forumId([0-9]+)/t/:topicId([0-9]+)/p/:postId([0-9]+)', function(req, res) {
+  if(req.isAuthenticated()) {
+    let currentTopic = forum[req.params.forumId].topics.find(topic=>topic.id==req.params.topicId);
+    let currentPost = currentTopic.posts.find(post=>post.id == req.params.postId)
+    if(currentPost.author === req.user.username) {
+      currentPost.post = req.body.post;
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(401)
+    }
+  } else {
+    res.sendStatus(401)
+  }
+})
